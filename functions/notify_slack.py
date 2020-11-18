@@ -56,7 +56,8 @@ def deploy_notification(subject, message):
     "fallback": "A new message",
     "fields": [{"title": "", 
         "value": f'[{component}] Deployment of {app} in {env} happening now!', 
-        "short": False}]
+        "short": False,
+        "color": '#0DF709'}]
   }
 
 
@@ -89,7 +90,6 @@ def notify_slack(subject, message, region):
     payload['attachments'].append(notification)
   elif message['Event'] == 'autoscaling:TEST_NOTIFICATION':
     payload['text'] = ""
-    payload['color'] = '#0DF709'
     payload['attachments'].append(deploy_notification(subject, message))
   else:
     payload['text'] = "AWS notification"
