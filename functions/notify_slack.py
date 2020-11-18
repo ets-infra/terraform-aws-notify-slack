@@ -44,6 +44,22 @@ def default_notification(subject, message):
   }
 
 
+def deploy_notification(subject, message):
+  full_app  = message['AutoScalingGroupName'].split("_")[0]
+  app       = full_app.split("-")[0]
+  component = full_app.split("-")[1].upper()
+  env = "TEST"
+  if message['AccountId'] != '380983831295':
+      env = "PROD"
+
+  return {
+    "fallback": "A new message",
+    "fields": [{"title": "", 
+        "value": f'[{component}] Deployment of {app} in {env} happening now!', 
+        "short": False}]
+  }
+
+
 # Send a message to a slack channel
 def notify_slack(subject, message, region):
   slack_url = os.environ['SLACK_WEBHOOK_URL']
@@ -71,6 +87,10 @@ def notify_slack(subject, message, region):
     notification = cloudwatch_notification(message, region)
     payload['text'] = "AWS CloudWatch notification - " + message["AlarmName"]
     payload['attachments'].append(notification)
+  elif message['Event'] == 'autoscaling:TEST_NOTIFICATION':
+    payload['text'] = ""
+    payload['color'] = '#0DF709'
+    payload['attachments'].append(deploy_notification(subject, message))
   else:
     payload['text'] = "AWS notification"
     payload['attachments'].append(default_notification(subject, message))
